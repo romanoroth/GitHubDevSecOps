@@ -11,3 +11,7 @@ Here is the link to the blog-post: https://www.romanoroth.com/post/gitlab-vs-git
 - GitHub: DevSecOps: Part 5/12: Protect your Apps with Static Application Security Testing (SAST) https://youtu.be/p4xS2X5KsNk
 - GitHub: DevSecOps: Part 6/12: How to use Container Scanning https://youtu.be/_ZeKh3GcbgU
 - GitHub: DevSecOps: Part 7/12: How to find secrets in your own code with Secret Scanning https://youtu.be/k-uuPTLNXGM 
+- Coming Soon
+
+
+Link to the GitLab repository: https://gitlab.com/romano_roth/gitlabdevsecopspipeline
