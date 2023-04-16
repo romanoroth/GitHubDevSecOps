@@ -1,0 +1,63 @@
+name: 50 DAST Scan Docker Image
+on:
+  workflow_dispatch:
+    inputs:
+      image-tag:
+        type: string
+        description: 'The name of the docker image to scan'
+        required: true
+
+  workflow_call:
+    inputs:
+      image-tag:
+        type: string
+        description: 'The name of the docker image to scan'
+        required: true
+env:
+# used for docker
+  REGISTRY: ghcr.io
+  IMAGE_TAG: ${{ inputs.image-tag || github.event.inputs.image-tag }}
+
+jobs:
+
+  dast-scan:
+      #contents: read # for actions/checkout to fetch code
+      #security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+      #actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status 
+      #missing only package:read?
+    name: DAST Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - run: docker rm demoApp | true && docker run -d -p 8080:8080 --name demoApp ${{ env.IMAGE_TAG }}         
+
+      - name: wait for container to start
+        run: timeout 300 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:8080)" != "200" ]]; do sleep 5; done' || false
+
+      - name: test container
+        run: curl -s localhost:8080/echo?msg=Hello%20World!
+     
+      - name: Run ZAP OWASP full scan
+        uses: zaproxy/action-full-scan@v0.4.0
+        with:
+          docker_name: 'owasp/zap2docker-stable'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          target: 'http://localhost:8080'
+          cmd_options: '-a -j -l WARN -z "-addoninstallall" '
+          allow_issue_writing: true
+
+      - name: Upload html report
+        uses: actions/upload-artifact@v3
+        with:
+          name: DAST_Report.html
+          path: report_html.html
+
+      - name: stop docker
+        if: always()
+        run: |
+          docker stop demoApp && docker rm demoApp && docker container prune --force && docker image prune --force

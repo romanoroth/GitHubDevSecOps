@@ -1,0 +1,58 @@
+name: 20 SCA
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  sca:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ "ubuntu-20.04" ] # [ "macos-latest", "windows-latest", "ubuntu-20.04" ]
+        # Test once with explicit manifest_file, and once without
+        manifest_file: [ "pom.xml" ]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    name: SCA Java project
+    steps:
+      - name: Checkout action
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: temurin
+          java-version: 11
+          cache: maven
+
+      - name: Install SCA tool (CRDA)
+        uses: redhat-actions/openshift-tools-installer@v1
+        with:
+          source: github
+          github_pat: ${{ github.token }}
+          crda: "latest"
+
+      #- name: SCA (CRDA) Scan
+      #  id: crda_scan
+      #  uses: redhat-actions/crda@v1.2
+      #  with:
+      #    manifest_file: ${{ matrix.manifest_file }}
+      #    snyk_token: ${{ secrets.OUR_SNYK_KEY }}
+      #    fail_on: never
+
+      - name: Print JSON analysis report
+        if: ${{ always() && steps.scan.outputs.crda_report_json }}
+        run: cat ${{ steps.scan.outputs.crda_report_json }}
+
+      - name: Print SARIF analysis report
+        if: ${{ always() && steps.scan.outputs.crda_report_sarif }}
+        run: cat ${{ steps.scan.outputs.crda_report_sarif }}
+
+      - name: Print Report Link
+        run: echo ${{ steps.scan.outputs.report_link }}
+
+      - name: Print Artifact Name
+        run: echo ${{ steps.scan.outputs.artifact_name }}

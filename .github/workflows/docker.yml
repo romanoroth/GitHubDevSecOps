@@ -1,0 +1,48 @@
+name: 50 Build docker image
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    outputs:
+      image-tag:
+        description: 'The image tag of the new docker image'
+        value: ${{ jobs.docker.outputs.image-tag }}
+
+    
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  docker:
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+    - uses: actions/checkout@v3
+    - name: Download application binary
+      uses: actions/download-artifact@v3.0.0
+      with:
+        name: Application-Binary
+        path: target
+    - name: Log in to the Container registry
+      uses: docker/login-action@v2.1.0
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@v4.1.0
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v3.2.0
+      with:
+        context: .
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}

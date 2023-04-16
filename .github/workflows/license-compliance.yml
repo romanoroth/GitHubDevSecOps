@@ -1,0 +1,34 @@
+name: 30 License Compliance
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  license-finder:
+  # Using https://github.com/pivotal/LicenseFinder
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout Repository'
+        uses: actions/checkout@v3
+      - name: 'License Finder fix with mvnw'
+        run: rm mvnw
+      - name: 'License Finder'
+        uses: jmservera/license-finder-action@main
+        with:
+          permitted-licenses: MIT,Apache-2.0,BSD,EPL1
+          approved-dependencies: |
+                                 hamcrest,hamcrest-core,hamcrest-library
+                                 junit-jupiter,junit-jupiter-api,junit-jupiter-engine,javax.annotation-api
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2.2.0
+        if: always()
+        with:
+          junit_files: "license_finder_report.xml"
+          check_name: "License Compliance Check"
+      - name: 'Upload Dependency Review Report'
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: license-finder-report
+          path: ${{ github.workspace }}/license_finder_report.xml
