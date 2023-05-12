@@ -39,6 +39,15 @@ jobs:
       uses: docker/metadata-action@v4.1.0
       with:
         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        # make sure scheduled also uses main as tag label of the image (default is nightly which will fail in containerscanner) EVENT=BRANCH and SCHEDULE MUST BE LAST to work
+        tags: |
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=semver,pattern={{major}}
+          type=ref,event=pr
+          type=ref,event=tag
+          type=ref,event=branch
+          type=schedule,pattern=main
     - name: Build and push Docker image
       uses: docker/build-push-action@v3.2.0
       with:

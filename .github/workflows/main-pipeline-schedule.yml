@@ -1,10 +1,9 @@
-name: 00 - Main CI / CD Pipeline
+name: 00 - Schedule Main CI / CD Pipeline
 
 on:
-  push:
-    paths-ignore:
-      - '**/*.md'
-      - '**/*.txt'
+  schedule:
+    # * is a special character in YAML so you have to quote this string, this is always UTC -> d.h. subtract 1h for CET. run saturday
+    - cron:  '28 14 * * *'
   workflow_dispatch:
   
 jobs:
@@ -25,12 +24,6 @@ jobs:
     uses: ./.github/workflows/sast.yml
     secrets: inherit
 
-  license-compliance:
-    needs: build
-    name: License compliance
-    uses: ./.github/workflows/license-compliance.yml
-    secrets: inherit
-
   docker:
     needs: build
     name: Build docker image
@@ -45,11 +38,4 @@ jobs:
     with:
       image-tag: ${{ needs.docker.outputs.image-tag }}
 
-  dast:
-    needs: [build,docker]
-    name: DAST Scan
-    uses: ./.github/workflows/dast.yml
-    secrets: inherit
-    with:
-      image-tag: ${{ needs.docker.outputs.image-tag }}
  

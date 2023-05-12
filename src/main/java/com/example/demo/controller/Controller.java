@@ -52,7 +52,7 @@ public class Controller {
     @GetMapping("/echo")
     String echo(@RequestParam(name = "msg") String message) {
         // using input without validation
-        return "Echo: "+message+". MD5: "+Base64.getEncoder().encodeToString(getHash(message));
+        return "Echo: Salve. MD5: "+Base64.getEncoder().encodeToString(getHash(message));
     }
 
     public byte[] getHash(String toMd5) {
