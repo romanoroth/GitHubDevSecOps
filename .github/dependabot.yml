@@ -1,0 +1,21 @@
+version: 2
+updates:
+  - package-ecosystem: "maven"
+    directory: "/" # Location of your pom.xml file
+    schedule:
+      interval: "weekly" # Check for updates weekly
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    target-branch: "main"
+    rebase-strategy: "auto"
+    assignees:
+      - "Prakash-Poatan"
+    reviewers:
+      - "Prakash-Poatan"
+    labels:
+      - "dependencies"
+      - "automated"
+    ignore:
+      - dependency-name: "guava"

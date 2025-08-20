@@ -19,7 +19,7 @@ public class Controller {
     // these are for secret detection
     private final static String username="User1";
     private final static String password="password";
-    private final static String pwd="password2";
+    private final static String pwd="password@2";
 
     private final static String pwdtest="pwd_Test22";
     //use pwd pwd_BlaTest24
@@ -32,7 +32,7 @@ public class Controller {
 	//use pwd pwd_BlaTest25
      
     private final String idForCloud = "AKIAIOSFODNN7EXAMPLE";
-    private final String valueForCloud = "wJalrXUtnFEMI/K7MDENG/bPxRfiCY78ZWn/7";
+    private final String valueForCloud = "wJalrXUtnFEMI/K7MDENG/bPxRfiCY78ZWn/72";
 
     private final static String pwdPropertyName="prop.password";
     
